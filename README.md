@@ -56,7 +56,7 @@ Then open vim and rum `:helptags ~/.vim/bundle/ag/doc`.
 
 You can specify a custom ag name and path in your .vimrc like so:
 
-    let g:agprg="<custom-ag-path-goes-here> --column"
+    let g:ag_prg="<custom-ag-path-goes-here> --column"
 
 You can configure ag.nvim to always start searching from your project root
 instead of the cwd
