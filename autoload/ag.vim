@@ -51,16 +51,11 @@ function! ag#Ag(cmd, args) abort
   endif
 
   " Store the backups
-  let l:grepprg_bak = &grepprg
-  let l:grepprg_bak = &l:grepprg
-  let l:grepformat_bak = &grepformat
   let l:t_ti_bak = &t_ti
   let l:t_te_bak = &t_te
 
   " Try to change all the system variables and run ag in the right folder
   try
-    let &l:grepprg  = g:ag_prg
-    let &grepformat = g:ag_format
     set t_ti=                      " These 2 commands make ag.vim not bleed in terminal
     set t_te=
     if g:ag_working_path_mode ==? 'r' " Try to find the project root for current buffer
@@ -77,8 +72,6 @@ function! ag#Ag(cmd, args) abort
       call s:executeCmd(l:grepargs, l:cmd)
     endif
   finally
-    let &l:grepprg = l:grepprg_bak
-    let &grepformat = l:grepformat_bak
     let &t_ti = l:t_ti_bak
     let &t_te = l:t_te_bak
   endtry
@@ -196,7 +189,11 @@ function! s:handleAsyncOutput(job_id, data, event) abort
     let l:expandeddata = []
     " Expand the path of the result so we can jump to it
     for l:result in s:data
-      if( l:result !~? '^/home/' ) " Only expand when the path is not a full path already
+      " At the end we usually have some bogous/empty lines, so skip them
+      if( l:result =~ '^\s*$')
+        continue
+      endif
+      if( l:result !~? '^/' ) " Only expand when the path is not a full path already
         let l:result = s:cwd.'/'.l:result
       endif
       let l:result = substitute(l:result , '//', '/' ,'g') " Get rid of excess slashes in filename if present
@@ -204,9 +201,8 @@ function! s:handleAsyncOutput(job_id, data, event) abort
     endfor
 
     if len(l:expandeddata) " Only if we actually find something
-
-      " The last element is always bogus for some reason
-      let l:expandeddata = l:expandeddata[0:-2]
+      let l:errorformat_bak = &errorformat
+      let &errorformat = g:ag_format
 
       if s:locListCommand
         " Add to location list
@@ -215,6 +211,7 @@ function! s:handleAsyncOutput(job_id, data, event) abort
         " Add to quickfix list
         cgete l:expandeddata
       endif
+      let &errorformat = l:errorformat_bak
       call s:handleOutput()
     else
       echom 'No matches for "'.s:args.'"'
