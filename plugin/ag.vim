@@ -47,14 +47,11 @@ if !exists('g:ag_working_path_mode')
 endif
 
 command! -bang -nargs=* -complete=file Ag call ag#Ag('grep<bang>',<f-args>)
-command! -bang -nargs=* -complete=file AgBuffer call ag#AgBuffer('grep<bang>',<q-args>)
-command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <q-args>)
-command! -bang -nargs=* -complete=file AgFromSearch call ag#AgFromSearch('grep<bang>', <q-args>)
-command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <q-args>)
-command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<q-args>)
-command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <q-args>)
-command! -bang -nargs=* -complete=file AgFile call ag#AgFile('grep<bang>', <q-args>)
-command! -bang -nargs=* -complete=help AgHelp call ag#AgHelp('grep<bang>',<q-args>)
-command! -bang -nargs=* -complete=help LAgHelp call ag#AgHelp('lgrep<bang>',<q-args>)
+command! -bang -nargs=* -complete=file AgBuffer call ag#AgBuffer('grep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <f-args>)
+command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <f-args>)
+command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <f-args>)
+command! -bang -nargs=* -complete=file AgFile call ag#AgFile('grep<bang>', <f-args>)
 
 let g:autoloaded_ag = 1

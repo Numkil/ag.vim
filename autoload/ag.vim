@@ -5,7 +5,7 @@ let s:job_number = 0
 let s:toLocList = 0
 let s:args = ''
 let s:cwd = getcwd()
-let s:data = []
+let s:data = ['']
 let s:resetData = 1
 
 "-----------------------------------------------------------------------------
@@ -52,15 +52,9 @@ function! ag#Ag(cmd, ...) abort
     let &t_ti = l:t_ti_bak
     let &t_te = l:t_te_bak
   endtry
-
-  " No neovim, when we finally get here we already have the output so run handleOutput
-  if !has('nvim')
-    call s:handleOutput()
-    return
-  endif
 endfunction
 
-function! ag#AgBuffer(cmd, args) abort
+function! ag#AgBuffer(...) abort
   let l:bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
   let l:files = []
   for buf in l:bufs
@@ -69,29 +63,19 @@ function! ag#AgBuffer(cmd, args) abort
       call add(l:files, l:file)
     endif
   endfor
-  call ag#Ag(a:cmd, a:args . ' ' . join(l:files, ' '))
+  
+  let l:args = a:000 + l:files
+  call call(function('ag#Ag'), l:args)
 endfunction
 
-function! ag#AgFromSearch(cmd, args) abort
-  let l:search =  getreg('/')
-  " translate vim regular expression to perl regular expression.
-  let l:search = substitute(l:search,'\(\\<\|\\>\)','\\b','g')
-  call ag#Ag(a:cmd, '"' .  l:search .'" '. a:args)
+function! ag#AgFile(cmd, ...) abort
+  let l:args = [cmd, '-g'] + a:000
+  call call(function('ag#Ag'), l:args)
 endfunction
 
-function! ag#AgHelp(cmd,args) abort
-  let l:args = a:args.' '.s:GetDocLocations()
-  call ag#Ag(a:cmd,l:args)
-endfunction
-
-function! ag#AgFile(cmd, args) abort
-  let l:args = ' -g ' . a:args
-  call ag#Ag(a:cmd, l:args)
-endfunction
-
-function! ag#AgAdd(cmd, args) abort
+function! ag#AgAdd(...) abort
   let s:resetData = 0
-  call ag#Ag(a:cmd, a:args)
+  call call(function('ag#Ag'), a:000)
 endfunction
 
 "-----------------------------------------------------------------------------
@@ -158,7 +142,8 @@ function! s:handleAsyncOutput(job_id, data, event) abort
 
   " Store all the input we get from the shell
   if a:event ==# 'stdout'
-    let s:data = s:data+a:data
+    let s:data[-1] .= a:data[0]
+    call extend(s:data, a:data[1:])
 
   " When the program has finished running we parse the data
   elseif a:event ==# 'exit'
@@ -204,7 +189,7 @@ function! s:execAg(args, opts) abort
 
   " Clear all of the old captures
   if s:resetData
-    let s:data = []
+    let s:data = ['']
   endif
   let s:resetData = 1
 
@@ -217,7 +202,6 @@ function! s:execAg(args, opts) abort
   let l:cmd = g:ag_prg + a:args
   let s:args = join(a:args, " ")
 
-  echom join(l:cmd, " ")
   echom 'Ag search started'
   let s:job_number = jobstart(l:cmd, extend(l:opts, a:opts))
 endfunction
