@@ -2,7 +2,7 @@
 "
 " Variables required to manage async
 let s:job_number = 0
-let s:locListCommand = 0
+let s:toLocList = 0
 let s:args = ''
 let s:cwd = getcwd()
 let s:data = []
@@ -12,42 +12,26 @@ let s:resetData = 1
 " Public API
 "-----------------------------------------------------------------------------
 
-function! ag#Ag(cmd, args) abort
-  let l:ag_executable = get(split(g:ag_prg, ' '), 0)
-
-  " Ensure that `ag` is installed
-  if !executable(l:ag_executable)
-    echoe "Ag command '" . l:ag_executable . "' was not found. Is the silver searcher installed and on your $PATH?"
-    return
-  endif
-
+function! ag#Ag(cmd, ...) abort
+  if empty(a:000)
+    let l:args = [expand('<cword>')]
+  els
   " If no pattern is provided, search for the word under the cursor
-  if empty(a:args)
-    let l:grepargs = expand('<cword>')
-  else
-    let l:grepargs = a:args . join(a:000, ' ')
+    let l:args = a:000
   end
 
-  if empty(l:grepargs)
-    echo "Usage: ':Ag {pattern}'. See ':help :Ag' for more information."
-    return
-  endif
-
   " Format, used to manage column jump
-  if a:args =~# '-g'
-    let s:ag_format_backup = g:ag_format
-    let g:ag_format = '%f'
-  elseif exists('s:ag_format_backup')
-    let g:ag_format = s:ag_format_backup
+  if index(l:args, '-g') >= 0
+    let s:ag_current_format = '%f'
+  else
+    let s:ag_current_format = g:ag_format
   endif
 
   " Set the script variables that will later be used by the async callback
-  let s:args = l:grepargs
-  let l:cmd = a:cmd . ' ' . escape(l:grepargs, '|')
-  if l:cmd =~# '^l'
-    let s:locListCommand = 1
+  if a:cmd =~# '^l'
+    let s:toLocList = 1
   else
-    let s:locListCommand = 0
+    let s:toLocList = 0
   endif
 
   " Store the backups
@@ -59,17 +43,10 @@ function! ag#Ag(cmd, args) abort
     set t_ti=                      " These 2 commands make ag.vim not bleed in terminal
     set t_te=
     if g:ag_working_path_mode ==? 'r' " Try to find the project root for current buffer
-      let l:cwd_back = getcwd()
-      let s:cwd = s:guessProjectRoot()
-      try
-        exe 'lcd '.s:cwd
-      catch
-      finally
-        call s:executeCmd(l:grepargs, l:cmd)
-        exe 'lcd '.l:cwd_back
-      endtry
+      let l:cwd = s:guessProjectRoot()
+      call s:execAg(l:args,  { 'cwd': l:cwd})
     else " Someone chose an undefined value or 'c' so we revert to searching in the cwd
-      call s:executeCmd(l:grepargs, l:cmd)
+      call s:execAg(l:args, {})
     endif
   finally
     let &t_ti = l:t_ti_bak
@@ -122,14 +99,14 @@ endfunction
 "-----------------------------------------------------------------------------
 
 function! s:handleOutput() abort
-  if s:locListCommand
+  if s:toLocList
     let l:match_count = len(getloclist(winnr()))
   else
     let l:match_count = len(getqflist())
   endif
 
   if l:match_count
-    if s:locListCommand
+    if s:toLocList
       exe g:ag_lhandler
       let l:apply_mappings = g:ag_apply_lmappings
       let l:matches_window_prefix = 'l' " we're using the location list
@@ -202,9 +179,9 @@ function! s:handleAsyncOutput(job_id, data, event) abort
 
     if len(l:expandeddata) " Only if we actually find something
       let l:errorformat_bak = &errorformat
-      let &errorformat = g:ag_format
+      let &errorformat = s:ag_current_format
 
-      if s:locListCommand
+      if s:toLocList
         " Add to location list
         lgete l:expandeddata
       else
@@ -219,13 +196,7 @@ function! s:handleAsyncOutput(job_id, data, event) abort
   endif
 endfunction
 
-function! s:executeCmd(grepargs, cmd) abort
-  if !has('nvim')
-    silent! execute a:cmd
-    return
-  endif
-
-  " Stop older running ag jobs if any
+function! s:execAg(args, opts) abort
   try
     call jobstop(s:job_number)
   catch
@@ -237,30 +208,18 @@ function! s:executeCmd(grepargs, cmd) abort
   endif
   let s:resetData = 1
 
-  " All types of exiting the job should be directed to handleAsyncOutput
-  let s:callbacks = {
-  \ 'on_stdout': function('s:handleAsyncOutput'),
-  \ 'on_stderr': function('s:handleAsyncOutput'),
-  \ 'on_exit': function('s:handleAsyncOutput')
-  \ }
+  let l:opts = { 
+        \ 'on_stdout': function('s:handleAsyncOutput'),
+        \ 'on_stderr': function('s:handleAsyncOutput'),
+        \ 'on_exit': function('s:handleAsyncOutput')
+        \ }
 
-  let l:splitargs = split(a:grepargs)
-  let l:grepargs = ''
-  "Make sure we shellescape arguments separately and expand the ~ in a string
-  for l:splitarg in l:splitargs
-    if l:splitarg !~? '^-'
-        let l:grepargs = l:grepargs.' '.shellescape(substitute(l:splitarg,'^\~',$HOME, ''))
-    else
-        let l:grepargs = l:grepargs.' '.l:splitarg
-    endif
-  endfor
+  let l:cmd = g:ag_prg + a:args
+  let s:args = join(a:args, " ")
 
-  " Construct the command string send to job shell -
-  " cd [directory]; ag --vimgrep [extra flags] '[value]' '[optional directory]'
-  let l:agcmd = 'cd '.s:cwd.'; '.g:ag_prg . ' ' .  l:grepargs
-
+  echom join(l:cmd, " ")
   echom 'Ag search started'
-  let s:job_number = jobstart(['sh', '-c', l:agcmd], extend({'shell': 'shell 1'}, s:callbacks))
+  let s:job_number = jobstart(l:cmd, extend(l:opts, a:opts))
 endfunction
 
 
