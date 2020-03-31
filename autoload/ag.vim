@@ -43,10 +43,9 @@ function! ag#Ag(cmd, ...) abort
     set t_ti=                      " These 2 commands make ag.vim not bleed in terminal
     set t_te=
     if g:ag_working_path_mode ==? 'r' " Try to find the project root for current buffer
-      let l:cwd = s:guessProjectRoot()
-      call s:execAg(l:args,  { 'cwd': l:cwd})
+      call s:execAg(l:args,  { 'cwd': s:guessProjectRoot() })
     else " Someone chose an undefined value or 'c' so we revert to searching in the cwd
-      call s:execAg(l:args, {})
+      call s:execAg(l:args, {'cwd': getcwd() })
     endif
   finally
     let &t_ti = l:t_ti_bak
