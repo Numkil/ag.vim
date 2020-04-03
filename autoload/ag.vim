@@ -12,12 +12,12 @@ let s:resetData = 1
 " Public API
 "-----------------------------------------------------------------------------
 
-function! ag#Ag(cmd, ...) abort
-  if empty(a:000)
+function! ag#run(cmd, args, cwd) abort
+  if empty(a:args)
     let l:args = [expand('<cword>')]
   els
   " If no pattern is provided, search for the word under the cursor
-    let l:args = a:000
+    let l:args = a:args
   end
 
   " Format, used to manage column jump
@@ -42,16 +42,22 @@ function! ag#Ag(cmd, ...) abort
   try
     set t_ti=                      " These 2 commands make ag.vim not bleed in terminal
     set t_te=
-    if g:ag_working_path_mode ==? 'r' " Try to find the project root for current buffer
-      call s:execAg(l:args,  { 'cwd': s:guessProjectRoot() })
-    else " Someone chose an undefined value or 'c' so we revert to searching in the cwd
-      call s:execAg(l:args, {'cwd': getcwd() })
-    endif
+    call s:execAg(l:args,  { 'cwd': a:cwd })
   finally
     let &t_ti = l:t_ti_bak
     let &t_te = l:t_te_bak
   endtry
 endfunction
+
+function! ag#Ag(cmd, ...) abort
+  let l:args = a:000
+  if g:ag_working_path_mode ==? 'r' " Try to find the project root for current buffer
+    let l:cwd = s:guessProjectRoot()
+  else " Someone chose an undefined value or 'c' so we revert to searching in the cwd
+    let l:cwd =  getcwd()
+  endif
+  call ag#run(a:cmd, l:args, l:cwd)
+endf
 
 function! ag#AgBuffer(...) abort
   let l:bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
