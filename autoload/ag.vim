@@ -133,7 +133,7 @@ function! s:handleOutput() abort
   endif
 endfunction
 
-function! s:handleAsyncOutput(job_id, data, event) abort
+function! s:handleAsyncOutput(job_id, data, event) abort dict
   " Don't care about older async calls that have been killed or replaced
   if s:job_number !=# a:job_id
     return
@@ -155,7 +155,7 @@ function! s:handleAsyncOutput(job_id, data, event) abort
         continue
       endif
       if( l:result !~? '^/' ) " Only expand when the path is not a full path already
-        let l:result = s:cwd.'/'.l:result
+        let l:result = self.cwd.'/'.l:result
       endif
       let l:result = substitute(l:result , '//', '/' ,'g') " Get rid of excess slashes in filename if present
       call add(l:expandeddata, l:result)
@@ -205,17 +205,6 @@ function! s:execAg(args, opts) abort
   let s:job_number = jobstart(l:cmd, extend(l:opts, a:opts))
 endfunction
 
-
-function! s:GetDocLocations() abort
-  let dp = ''
-  for p in split(&runtimepath,',')
-    let p = p.'doc/'
-    if isdirectory(p)
-      let dp = p.'*.txt '.dp
-    endif
-  endfor
-  return dp
-endfunction
 
 " Called from within a list window, preserves its height after shuffling vsplit.
 " The parameter indicates whether list was opened as copen or lopen.
