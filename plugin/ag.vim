@@ -11,7 +11,7 @@ endif
 
 " Location of the ag utility
 if !exists('g:ag_prg')
-  let g:ag_prg = ['rg','-S', '--vimgrep']
+  let g:ag_prg = ['rg','--follow', '--smart-case', '--vimgrep']
 endif
 
 if !exists('g:ag_format')
