@@ -20,12 +20,7 @@ function! ag#run(cmd, args, cwd) abort
     let l:args = a:args
   end
 
-  " Format, used to manage column jump
-  if index(l:args, '-g') >= 0
-    let s:ag_current_format = '%f'
-  else
-    let s:ag_current_format = g:ag_format
-  endif
+  let s:ag_current_format = g:ag_format
 
   " Set the script variables that will later be used by the async callback
   if a:cmd =~# '^l'

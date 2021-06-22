@@ -4,8 +4,8 @@ if exists('g:autoloaded_ag')
   finish
 endif
 
-if !executable('ag')
-  echoe "Ag command was not found. Is the silver searcher installed and on your $PATH?"
+if !executable('rg')
+  echoe "Ag command was not found. Is ripgrep installed?"
   finish
 endif
 
