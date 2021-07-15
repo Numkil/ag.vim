@@ -4,20 +4,14 @@ if exists('g:autoloaded_ag')
   finish
 endif
 
-if !executable('ag')
-  echoe "Ag command was not found. Is the silver searcher installed and on your $PATH?"
+if !executable('rg')
+  echoe "Ag command was not found. Is ripgrep installed?"
   finish
 endif
 
 " Location of the ag utility
 if !exists('g:ag_prg')
-  " --vimgrep (consistent output we can parse) is available from version  0.25.0+
-  if split(system('ag --version'), '[ \n\r\t]')[2] =~? '\d\+.\(2[5-9]\|[3-9][0-9]\)\(.\d\+\)\?'
-    let g:ag_prg = 'ag --vimgrep --silent'
-  else
-    " --noheading seems odd here, but see https://github.com/ggreer/the_silver_searcher/issues/361
-    let g:ag_prg = 'ag --column --nogroup --noheading'
-  endif
+  let g:ag_prg = ['rg','--follow', '--smart-case', '--vimgrep']
 endif
 
 if !exists('g:ag_format')
@@ -52,15 +46,12 @@ if !exists('g:ag_working_path_mode')
     let g:ag_working_path_mode = 'c'
 endif
 
-command! -bang -nargs=* -complete=file Ag call ag#Ag('grep<bang>',<q-args>)
-command! -bang -nargs=* -complete=file AgBuffer call ag#AgBuffer('grep<bang>',<q-args>)
-command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <q-args>)
-command! -bang -nargs=* -complete=file AgFromSearch call ag#AgFromSearch('grep<bang>', <q-args>)
-command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <q-args>)
-command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<q-args>)
-command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <q-args>)
-command! -bang -nargs=* -complete=file AgFile call ag#AgFile('grep<bang>', <q-args>)
-command! -bang -nargs=* -complete=help AgHelp call ag#AgHelp('grep<bang>',<q-args>)
-command! -bang -nargs=* -complete=help LAgHelp call ag#AgHelp('lgrep<bang>',<q-args>)
+command! -bang -nargs=* -complete=file Ag call ag#Ag('grep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file AgBuffer call ag#AgBuffer('grep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <f-args>)
+command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <f-args>)
+command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <f-args>)
+command! -bang -nargs=* -complete=file AgFile call ag#AgFile('grep<bang>', <f-args>)
 
 let g:autoloaded_ag = 1
