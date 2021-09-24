@@ -72,7 +72,7 @@ function! ag#AgFile(cmd, ...) abort
 
   let l:ag_prg_prev = g:ag_prg
   let g:ag_prg = ['ag','--vimgrep','--silent']
-  let l:args = [cmd, '-g'] + a:000
+  let l:args = [a:cmd, '-g'] + a:000
   call call(function('ag#Ag'), l:args)
   let g:ag_prg = l:ag_prg_prev
 endfunction
