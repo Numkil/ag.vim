@@ -21,12 +21,18 @@ function! ag#run(cmd, args, cwd) abort
   end
 
   let s:ag_current_format = g:ag_format
+  let s:ag_current_prg = g:ag_prg
 
   " Set the script variables that will later be used by the async callback
   if a:cmd =~# '^l'
     let s:toLocList = 1
   else
     let s:toLocList = 0
+  endif
+
+  if a:cmd =~# 'find'
+    let s:ag_current_format = g:fd_format
+    let s:ag_current_prg = g:fd_prg
   endif
 
   " Store the backups
@@ -37,7 +43,7 @@ function! ag#run(cmd, args, cwd) abort
   try
     set t_ti=                      " These 2 commands make ag.vim not bleed in terminal
     set t_te=
-    call s:execAg(l:args,  { 'cwd': a:cwd })
+    call s:execAg(s:ag_current_prg, l:args,  { 'cwd': a:cwd })
   finally
     let &t_ti = l:t_ti_bak
     let &t_te = l:t_te_bak
@@ -66,15 +72,6 @@ function! ag#AgBuffer(...) abort
   
   let l:args = a:000 + l:files
   call call(function('ag#Ag'), l:args)
-endfunction
-
-function! ag#AgFile(cmd, ...) abort
-
-  let l:ag_prg_prev = g:ag_prg
-  let g:ag_prg = ['ag','--vimgrep','--silent']
-  let l:args = [a:cmd, '-g'] + a:000
-  call call(function('ag#Ag'), l:args)
-  let g:ag_prg = l:ag_prg_prev
 endfunction
 
 function! ag#AgAdd(...) abort
@@ -185,7 +182,7 @@ function! s:handleAsyncOutput(job_id, data, event) abort dict
   endif
 endfunction
 
-function! s:execAg(args, opts) abort
+function! s:execAg(prg, args, opts) abort
   try
     call jobstop(s:job_number)
   catch
@@ -203,7 +200,8 @@ function! s:execAg(args, opts) abort
         \ 'on_exit': function('s:handleAsyncOutput')
         \ }
 
-  let l:cmd = g:ag_prg + a:args
+  let l:cmd = a:prg + a:args
+  echom l:cmd
   let s:args = join(a:args, " ")
 
   echom 'Ag search started'

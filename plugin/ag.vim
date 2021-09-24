@@ -14,9 +14,18 @@ if !exists('g:ag_prg')
   let g:ag_prg = ['rg','--follow', '--smart-case', '--vimgrep']
 endif
 
+if !exists('g:fd_prg')
+  let g:fd_prg = ['fd','--follow']
+endif
+
+if !exists('g:fd_format')
+  let g:fd_format = '%f'
+endif
+
 if !exists('g:ag_format')
   let g:ag_format = '%f:%l:%c:%m'
 endif
+
 
 if !exists('g:ag_apply_qmappings')
   let g:ag_apply_qmappings = 1
@@ -52,6 +61,6 @@ command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <f-a
 command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <f-args>)
 command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<f-args>)
 command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <f-args>)
-command! -bang -nargs=* -complete=file AgFile call ag#AgFile('grep<bang>', <f-args>)
+command! -bang -nargs=* -complete=file Fd call ag#Ag('find<bang>', <f-args>)
 
 let g:autoloaded_ag = 1
