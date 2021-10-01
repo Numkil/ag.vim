@@ -201,7 +201,6 @@ function! s:execAg(prg, args, opts) abort
         \ }
 
   let l:cmd = a:prg + a:args
-  echom l:cmd
   let s:args = join(a:args, " ")
 
   echom 'Ag search started'
