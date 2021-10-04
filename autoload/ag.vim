@@ -110,11 +110,11 @@ function! s:handleOutput() abort
     redraw! " Regular vim needs some1 to tell it to redraw
 
     if l:apply_mappings
-      nnoremap <buffer> <silent> h  <C-W><CR>:exe 'wincmd ' (&splitbelow ? 'J' : 'K')<CR><C-W>p<C-W>J<C-W>p
-      nnoremap <buffer> <silent> H  <C-W><CR>:exe 'wincmd ' (&splitbelow ? 'J' : 'K')<CR><C-W>p<C-W>J
-      nnoremap <buffer> <silent> o  <CR>
+      nnoremap <buffer> <silent> f  <C-W><CR>:exe 'wincmd ' (&splitbelow ? 'J' : 'K')<CR><C-W>p<C-W>J<C-W>p
+      " nnoremap <buffer> <silent> H  <C-W><CR>:exe 'wincmd ' (&splitbelow ? 'J' : 'K')<CR><C-W>p<C-W>J
+      " nnoremap <buffer> <silent> o  <CR>
       nnoremap <buffer> <silent> t  <C-W><CR><C-W>T
-      nnoremap <buffer> <silent> T  <C-W><CR><C-W>TgT<C-W><C-W>
+      " nnoremap <buffer> <silent> T  <C-W><CR><C-W>TgT<C-W><C-W>
       nnoremap <buffer> <silent> v  <C-W><CR>:exe 'wincmd ' (&splitright ? 'L' : 'H')<CR><C-W>p<C-W>J<C-W>p
 
       let l:closecmd = l:matches_window_prefix . 'close'
@@ -200,7 +200,7 @@ function! s:execAg(prg, args, opts) abort
         \ 'on_exit': function('s:handleAsyncOutput')
         \ }
 
-  let l:cmd = a:prg + a:args
+  let l:cmd = a:prg + a:args + [ "./" ]
   let s:args = join(a:args, " ")
 
   echom 'Ag search started'
