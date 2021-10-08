@@ -70,7 +70,7 @@ function! ag#AgBuffer(...) abort
     endif
   endfor
   
-  let l:args = a:000 + l:files
+  let l:args = a:000 + ["--"] + l:files
   call call(function('ag#Ag'), l:args)
 endfunction
 
@@ -200,8 +200,16 @@ function! s:execAg(prg, args, opts) abort
         \ 'on_exit': function('s:handleAsyncOutput')
         \ }
 
-  let l:cmd = a:prg + a:args + [ "./" ]
-  let s:args = join(a:args, " ")
+
+  let l:args = copy(a:args)
+  let l:idx = index(l:args, "--")
+  if l:idx >= 0
+    call remove(l:args, l:idx)
+  else
+    call add(l:args,  "./")
+  endif
+  let l:cmd = a:prg + l:args
+  let s:args = join(l:args, " ")
 
   echom 'Ag search started'
   let s:job_number = jobstart(l:cmd, extend(l:opts, a:opts))
