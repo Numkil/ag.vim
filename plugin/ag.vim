@@ -62,6 +62,6 @@ command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <f-args>)
 command! -bang -nargs=* -complete=file LAgBuffer call ag#AgBuffer('lgrep<bang>',<f-args>)
 command! -bang -nargs=* -complete=file LAgAdd call ag#AgAdd('lgrepadd<bang>', <f-args>)
 command! -bang -nargs=* -complete=file Fd call ag#Ag('find<bang>', <f-args>)
-command AgAsArgs lua require("agvim").as_args()
+command FdAsArgs lua require("agvim").as_args()
 
 let g:autoloaded_ag = 1
