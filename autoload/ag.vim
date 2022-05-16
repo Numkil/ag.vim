@@ -219,7 +219,7 @@ function! s:execAg(prg, args, opts) abort
   let l:cmd = a:prg + l:args
   let s:args = join(l:args, " ")
 
-  echom 'Ag search started'
+  echom 'Ag search started (' . join(l:cmd, " ") . ')'
   let s:job_number = jobstart(l:cmd, extend(l:opts, a:opts))
 endfunction
 
