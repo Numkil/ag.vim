@@ -35,6 +35,14 @@ function! ag#run(cmd, args, cwd) abort
     let s:ag_current_prg = g:fd_prg
   endif
 
+  if a:cmd =~# 'findfull'
+    let s:ag_current_prg = s:ag_current_prg + ['--full-path']
+  endif
+
+  if a:cmd =~# '!$'
+    let s:ag_current_prg = s:ag_current_prg + ['--hidden']
+  endif
+
   " Store the backups
   let l:t_ti_bak = &t_ti
   let l:t_te_bak = &t_te
