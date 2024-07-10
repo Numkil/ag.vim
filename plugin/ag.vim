@@ -5,7 +5,7 @@ if exists('g:autoloaded_ag')
 endif
 
 if !executable('rg')
-  echoe "Ag command was not found. Is ripgrep installed?"
+  echoe "rg command was not found. Is ripgrep installed?"
   finish
 endif
 
@@ -56,6 +56,7 @@ if !exists('g:ag_working_path_mode')
 endif
 
 command! -bang -nargs=* -complete=file Ag call ag#Ag('grep<bang>',<f-args>)
+command! -bang -nargs=* -complete=file Af call ag#Ag('grepglob<bang>',<f-args>)
 command! -bang -nargs=* -complete=file AgBuffer call ag#AgBuffer('grep<bang>',<f-args>)
 command! -bang -nargs=* -complete=file AgAdd call ag#AgAdd('grepadd<bang>', <f-args>)
 command! -bang -nargs=* -complete=file LAg call ag#Ag('lgrep<bang>', <f-args>)

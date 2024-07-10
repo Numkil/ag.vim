@@ -39,9 +39,15 @@ function! ag#run(cmd, args, cwd) abort
     let s:ag_current_prg = s:ag_current_prg + ['--full-path']
   endif
 
+  if a:cmd =~ 'glob'
+    let s:ag_current_prg = s:ag_current_prg + ['--glob=' .. l:args[0]]
+    let l:args = l:args[1:]
+  endif
+
   if a:cmd =~# '!$'
     let s:ag_current_prg = s:ag_current_prg + ['--hidden']
   endif
+
 
   " Store the backups
   let l:t_ti_bak = &t_ti
